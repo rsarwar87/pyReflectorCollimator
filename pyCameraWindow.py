@@ -60,8 +60,6 @@ class CameraWindow():
                               fy= cc.frame_height/crop.shape[1], 
                               interpolation= cv.INTER_LINEAR)
 
-
-
         if cc.cbOffset == False: 
             origin = (int(cc.frame_width/2), int(cc.frame_height/2))
         else:
@@ -72,19 +70,17 @@ class CameraWindow():
             frame = cv.warpAffine(frame, M, (int(cc.frame_width), int(cc.frame_height)))
 
         if cc.tilt != 50:
-            tratio_w = int(((cc.tilt - 50)/50)*cc.frame_width)
-            tratio_h = int(((cc.tilt - 50)/50)*cc.frame_height)
+            tratio_w = int(((cc.tilt - 50)/500)*cc.frame_width)
+            tratio_h = int(((cc.tilt - 50)/500)*cc.frame_height)
             iframe = np.float32([[tratio_w,tratio_h], [cc.frame_width-tratio_w-1, tratio_h], 
-                                 [cc.frame_width - 1, cc.frame_height-1],
-                                 [0, cc.frame_height - 1]])
+                                 [cc.frame_width +tratio_w- 1, cc.frame_height+tratio_h-1],
+                                 [-tratio_w, cc.frame_height +tratio_h- 1]])
             oframe = np.float32([[0,0], [cc.frame_width-1, 0], 
                                  [cc.frame_width - 1, cc.frame_height-1],
                                  [0, cc.frame_height - 1]])
             M = cv.getPerspectiveTransform(iframe, oframe)
             frame = cv.warpPerspective(frame, M, (int(cc.frame_width), int(cc.frame_height)), 
                                     cv.INTER_LINEAR, borderMode=cv.BORDER_CONSTANT, borderValue=(0,0,0))
-
-
 
         for i in range(0, 3):
             if cc.cbCircleEnable[i] is True:
@@ -111,7 +107,6 @@ class CameraWindow():
                           color = (cc.cbRBG[i+3][2]*j, cc.cbRBG[i+3][1]*j, cc.cbRBG[i+3][0]*j), 
                           thickness = cc.cbThickness[i+3])
         
-
         data = np.flip(frame, 2)
         data = data.ravel()
         data = np.asfarray(data, dtype='f')
