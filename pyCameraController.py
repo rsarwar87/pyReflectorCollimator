@@ -56,7 +56,6 @@ class CameraController:
         print("Array stores elements of type: ", frame.dtype)
         self.get_resolution()
         self.declareCalibrationVariables()
-        self.create_window()
 
     def decode_fourcc(self, v):
         v = int(v)
@@ -274,68 +273,92 @@ class CameraController:
                                     label="Camera settings", closable=False,
                                     default_open=True) as self.camsettings:
                         self.ctbrightness = dpg.add_slider_int(label="Brightness", 
-                                        callback=self._camera_settings,
+                                        callback=self._vid_settings,
                                         user_data=[self.camsettings, 1],
                                         max_value=100, 
                                         default_value = self.brightness)
                         self.ctcontrast = dpg.add_slider_int(label="Contrast", 
-                                        callback=self._camera_settings,
+                                        callback=self._vid_settings,
                                         user_data=[self.camsettings, 2],
                                         max_value=100, 
                                         default_value = self.contrast)
                         self.cthue= dpg.add_slider_int(label="Hue", 
-                                        callback=self._camera_settings,
+                                        callback=self._vid_settings,
                                         user_data=[self.camsettings, 3],
                                         max_value=100, 
                                         default_value = self.hue)
                         self.ctsaturation = dpg.add_slider_int(label="Saturation", 
-                                        callback=self._camera_settings,
+                                        callback=self._vid_settings,
                                         user_data=[self.camsettings, 4],
                                         max_value=100, 
                                         default_value = self.saturation)
                         self.ctsharpness = dpg.add_slider_int(label="Sharpness", 
-                                        callback=self._camera_settings,
+                                        callback=self._vid_settings,
                                         user_data=[self.camsettings, 5],
                                         max_value=100, 
                                         default_value = self.sharpness)
                         self.ctgamma= dpg.add_slider_int(label="Gamma", 
-                                        callback=self._camera_settings,
+                                        callback=self._vid_settings,
                                         user_data=[self.camsettings, 6],
-                                        max_value=100, 
+                                        max_value=500, 
                                         default_value = self.gamma)
                         self.ctbacklight = dpg.add_slider_int(label="Backlight", 
-                                        callback=self._camera_settings,
-                                        user_data=[self.saturation, 7],
+                                        callback=self._vid_settings,
+                                        user_data=[self.camsettings, 7],
                                         max_value=100, 
                                         default_value = self.backlight)
-                        self.ctwhite_balance = dpg.add_slider_int(label="White balance", 
-                                        callback=self._camera_settings,
+                        self.ctwhite_balance = dpg.add_slider_int(label="Gain", 
+                                        callback=self._vid_settings,
                                         user_data=[self.camsettings, 8],
                                         max_value=100, 
                                         default_value = self.white_balance)
 
-    def _camera_settings(self, sender, app_data, user_data):
-        print(user_data )
-        print(app_data )
     def _vid_settings(self, sender, app_data, user_data):
-        if user_data[1] == 1:
-            self.zoom = app_data
-            print ("Zoom", self.zoom)
-        elif user_data[1] == 2:
-            self.focus = app_data
-            print ("focus", self.focus)
-        elif user_data[1] == 3:
-            self.exposure = app_data
-            print ("exposure", self.exposure)
-        elif user_data[1] == 4:
-            self.roll = app_data
-            print ("roll", self.roll)
-        elif user_data[1] == 5:
-            self.tilt = app_data
-            print ("tilt", self.tilt)
-        elif user_data[1] == 6:
-            self.set_fps(app_data)
-            print ("FPS", self.fps)
+        if user_data[0] == self.vidsettings:
+            if user_data[1] == 1:
+                self.zoom = app_data
+                print ("Zoom", self.zoom)
+            elif user_data[1] == 2:
+                self.focus = app_data
+                print ("focus", self.focus)
+            elif user_data[1] == 3:
+                self.exposure = app_data
+                print ("exposure", self.exposure)
+            elif user_data[1] == 4:
+                self.roll = app_data
+                print ("roll", self.roll)
+            elif user_data[1] == 5:
+                self.tilt = app_data
+                print ("tilt", self.tilt)
+            elif user_data[1] == 6:
+                self.set_fps(app_data)
+                print ("FPS", self.fps)
+        elif user_data[0] == self.camsettings:
+            if user_data[1] == 1:
+                self.brightness = app_data
+                print ("brightness", self.brightness, self.vid.set(cv.CAP_PROP_BRIGHTNESS, self.brightness)) 
+            elif user_data[1] == 2:
+                self.contrast = app_data
+                print ("brightness", self.contrast, self.vid.set(cv.CAP_PROP_CONTRAST, self.contrast)) 
+            elif user_data[1] == 3:
+                self.hue = app_data
+                print ("hue", self.contrast, self.vid.set(cv.CAP_PROP_HUE, self.hue)) 
+                print ("hue", self.hue)
+            elif user_data[1] == 4:
+                self.saturation = app_data
+                print ("saturation", self.contrast, self.vid.set(cv.CAP_PROP_SATURATION, self.saturation)) 
+            elif user_data[1] == 5:
+                self.sharpness = app_data
+                print ("sharpness", self.contrast, self.vid.set(cv.CAP_PROP_SHARPNESS, self.sharpness)) 
+            elif user_data[1] == 6:
+                self.gamma = app_data
+                print ("gamma", self.contrast, self.vid.set(cv.CAP_PROP_GAMMA, self.gamma)) 
+            elif user_data[1] == 7:
+                self.backlight = app_data
+                print ("backlight", self.contrast, self.vid.set(cv.CAP_PROP_BACKLIGHT, self.backlight)) 
+            elif user_data[1] == 8:
+                self.white_balance = app_data
+                print ("Gain", self.contrast, self.vid.set(cv.CAP_PROP_GAIN, self.white_balance)) 
 
     def _coloredit(self, sender, app_data, user_data):
         for i in range (0, 4): app_data[i] = int(app_data[i]*255)
@@ -493,11 +516,11 @@ class CameraController:
         self.roll = 0
         self.tilt = 50
 
-        self.brightness = 0 
-        self.contrast = 6
-        self.hue = 0
-        self.saturation = 0
-        self.sharpness = 0
-        self.gamma = 0
-        self.white_balance = 0
-        self.backlight = 0
+        self.brightness = self.vid.get(cv.CAP_PROP_BRIGHTNESS) 
+        self.contrast = self.vid.get(cv.CAP_PROP_CONTRAST)
+        self.hue = self.vid.get(cv.CAP_PROP_HUE)
+        self.saturation = self.vid.get(cv.CAP_PROP_SATURATION)
+        self.sharpness = self.vid.get(cv.CAP_PROP_SHARPNESS)
+        self.gamma = self.vid.get(cv.CAP_PROP_GAMMA)
+        self.white_balance = self.vid.get(cv.CAP_PROP_GAIN)
+        self.backlight = self.vid.get(cv.CAP_PROP_BACKLIGHT)

@@ -6,11 +6,13 @@ from pyCameraController import CameraController
 from pyCameraWindow import CameraWindow
 
 if __name__ == "__main__":
+    cc = CameraController(1)
     dpg.create_context()
-    dpg.create_viewport(title='PyReflectorCollimator', width=1200, height=800)
+    dpg.create_viewport(title='PyReflectorCollimator', width=1800, height=800)
     dpg.setup_dearpygui()
 
-    cc = CameraController(1)
+    cc.create_window()
+
     cw = CameraWindow(cc)
     print ("Initialized")
 
