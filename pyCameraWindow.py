@@ -25,8 +25,10 @@ class CameraWindow():
         print("Size of array: ", self.texture_data.size)
         print("Array stores elements of type: ", self.texture_data.dtype)
 
-        with dpg.texture_registry(show=True):
-            dpg.add_raw_texture(frame.shape[1], frame.shape[0], self.texture_data, tag="texture_tag", format=dpg.mvFormat_Float_rgb)
+        with dpg.texture_registry():
+            dpg.add_raw_texture(frame.shape[1], frame.shape[0], 
+                                self.texture_data, tag="texture_tag", 
+                                format=dpg.mvFormat_Float_rgb)
         
         with dpg.window(label="Capture Window",pos=(500, 0),
                         no_close=True) as self.mainForm:
@@ -50,26 +52,59 @@ class CameraWindow():
         
         ret, frame = self.cc.vid.read()
         cc = self.cc
+        if (cc.zoom > 0):
+            xx = int(cc.frame_width*cc.zoom/300)
+            yy = int(cc.frame_height*cc.zoom/300)
+            crop = frame[yy:-yy, xx:-xx]
+            frame = cv.resize(crop, None, fx= cc.frame_width/crop.shape[1], 
+                              fy= cc.frame_height/crop.shape[1], 
+                              interpolation= cv.INTER_LINEAR)
+
+
+
+        if cc.cbOffset == False: 
+            origin = (int(cc.frame_width/2), int(cc.frame_height/2))
+        else:
+            origin = (int(cc.xoffset), int(cc.yoffset))
+
+        if cc.roll > 0:
+            M = cv.getRotationMatrix2D(origin, cc.roll, 1)
+            frame = cv.warpAffine(frame, M, (int(cc.frame_width), int(cc.frame_height)))
+
+        if cc.tilt != 50:
+            tratio_w = int(((cc.tilt - 50)/50)*cc.frame_width)
+            tratio_h = int(((cc.tilt - 50)/50)*cc.frame_height)
+            iframe = np.float32([[tratio_w,tratio_h], [cc.frame_width-tratio_w-1, tratio_h], 
+                                 [cc.frame_width - 1, cc.frame_height-1],
+                                 [0, cc.frame_height - 1]])
+            oframe = np.float32([[0,0], [cc.frame_width-1, 0], 
+                                 [cc.frame_width - 1, cc.frame_height-1],
+                                 [0, cc.frame_height - 1]])
+            M = cv.getPerspectiveTransform(iframe, oframe)
+            frame = cv.warpPerspective(frame, M, (int(cc.frame_width), int(cc.frame_height)), 
+                                    cv.INTER_LINEAR, borderMode=cv.BORDER_CONSTANT, borderValue=(0,0,0))
+
+
+
         for i in range(0, 3):
             if cc.cbCircleEnable[i] is True:
                 j = 1
-                cv.circle(frame, (int(cc.xoffset), int(cc.yoffset)), 
+                cv.circle(frame, origin, 
                           radius = cc.cbRadius[i], 
                           color = (cc.cbRBG[i][2]*j, cc.cbRBG[i][1]*j, cc.cbRBG[i][0]*j), 
                           thickness = cc.cbThickness[i])
         for i in range(0, 2):
             if cc.cbCrossEnable[i] is True:
                 j = 1
-                origin = (cc.xoffset, cc.yoffset)
-                points = [(int(cc.xoffset - cc.cbLength[i]/2 ), int(cc.yoffset)),
-                          (int(cc.xoffset + cc.cbLength[i]/2 ), int(cc.yoffset))]
+                points = [(int(origin[0] - cc.cbLength[i]/2 ), origin[1]),
+                          (int(origin[0] + cc.cbLength[i]/2 ), origin[1])]
                 rp = self.rotate(points, origin=origin, degrees=cc.cbAngle[i])
                 cv.line(frame, (int(rp[0][0] ), int(rp[0][1])), 
                           (int(rp[1][0] ), int(rp[1][1])), 
                           color = (cc.cbRBG[i+3][2]*j, cc.cbRBG[i+3][1]*j, cc.cbRBG[i+3][0]*j), 
                           thickness = cc.cbThickness[i+3])
-                points = [(int(cc.xoffset), int(cc.yoffset - cc.cbLength[i]/2)),
-                          (int(cc.xoffset), int(cc.yoffset + cc.cbLength[i]/2))]
+                points = [(int(origin[0]), int(origin[1] - cc.cbLength[i]/2)),
+                          (origin[0], int(origin[1] + cc.cbLength[i]/2))]
                 rp = self.rotate(points, origin=origin, degrees=cc.cbAngle[i])
                 cv.line(frame, (int(rp[0][0] ), int(rp[0][1])), 
                           (int(rp[1][0] ), int(rp[1][1])), 

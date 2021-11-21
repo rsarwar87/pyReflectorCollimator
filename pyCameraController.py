@@ -29,6 +29,22 @@ class CameraController:
 
 
         self.vid = cv.VideoCapture(video_idx)
+        cap = self.vid
+        oldfourcc = self.decode_fourcc(self.vid.get(cv.CAP_PROP_FOURCC))
+        print("current codec {}".format(oldfourcc))
+        codec = cv.VideoWriter_fourcc(*'MJPG')
+        res=self.vid.set(cv.CAP_PROP_FOURCC,codec)
+        if res:
+            print("codec in ",self.decode_fourcc(self.vid.get(cv.CAP_PROP_FOURCC)))
+        else:
+            print("error, codec in ",self.decode_fourcc(self.vid.get(cv.CAP_PROP_FOURCC)))
+
+        w=1920
+        h=1080
+        fps=30
+        res1=cap.set(cv.CAP_PROP_FRAME_WIDTH,w)
+        res2=cap.set(cv.CAP_PROP_FRAME_HEIGHT,h)
+        res3=cap.set(cv.CAP_PROP_FPS,fps)
 
         self.fps = self.vid.get(cv.CAP_PROP_FPS)
         ret, frame = self.vid.read()
@@ -42,6 +58,10 @@ class CameraController:
         self.declareCalibrationVariables()
         self.create_window()
 
+    def decode_fourcc(self, v):
+        v = int(v)
+        return "".join([chr((v >> 8 * i) & 0xFF) for i in range(4)])
+
     def set_resolution(self, height, width):
         self.frame_height = height
         self.frame_width = width
@@ -52,6 +72,7 @@ class CameraController:
         return self.frame_height, self.frame_width
 
     def set_fps(self, fps):
+        print(self.vid.set(cv.CAP_PROP_FPS, fps))
         self.fps = fps
 
     def get_fps(self):
@@ -215,7 +236,106 @@ class CameraController:
 
 
                 with dpg.tab(label="Camera Control") as self.cameraTab:
-                    dpg.add_text("This is the tab 2!")
+                    self.cam_control_defaults()
+                    with dpg.collapsing_header(
+                                    label="Video settings", closable=False,
+                                    default_open=True) as self.vidsettings:
+                        self.ctzoom = dpg.add_slider_int(label="Zoom", 
+                                        callback=self._vid_settings,
+                                        user_data=[self.vidsettings, 1],
+                                        max_value=100, 
+                                        default_value = self.zoom)
+                        self.ctfocus = dpg.add_slider_int(label="Focus", 
+                                        callback=self._vid_settings,
+                                        user_data=[self.vidsettings, 2],
+                                        max_value=100, 
+                                        default_value = self.focus)
+                        self.ctexposure= dpg.add_slider_int(label="FPS", 
+                                        callback=self._vid_settings,
+                                        user_data=[self.vidsettings, 6],
+                                        max_value=100, 
+                                        default_value = self.fps)
+                        self.ctexposure= dpg.add_slider_int(label="Exposure (ms)", 
+                                        callback=self._vid_settings,
+                                        user_data=[self.vidsettings, 3],
+                                        max_value=5000, 
+                                        default_value = self.exposure)
+                        self.ctroll = dpg.add_slider_int(label="Roll", 
+                                        callback=self._vid_settings,
+                                        user_data=[self.vidsettings, 4],
+                                        max_value=360, 
+                                        default_value = self.roll)
+                        self.cttilt = dpg.add_slider_int(label="Tilt", 
+                                        callback=self._vid_settings,
+                                        user_data=[self.vidsettings, 5],
+                                        max_value=100, 
+                                        default_value = self.tilt)
+                    with dpg.collapsing_header(
+                                    label="Camera settings", closable=False,
+                                    default_open=True) as self.camsettings:
+                        self.ctbrightness = dpg.add_slider_int(label="Brightness", 
+                                        callback=self._camera_settings,
+                                        user_data=[self.camsettings, 1],
+                                        max_value=100, 
+                                        default_value = self.brightness)
+                        self.ctcontrast = dpg.add_slider_int(label="Contrast", 
+                                        callback=self._camera_settings,
+                                        user_data=[self.camsettings, 2],
+                                        max_value=100, 
+                                        default_value = self.contrast)
+                        self.cthue= dpg.add_slider_int(label="Hue", 
+                                        callback=self._camera_settings,
+                                        user_data=[self.camsettings, 3],
+                                        max_value=100, 
+                                        default_value = self.hue)
+                        self.ctsaturation = dpg.add_slider_int(label="Saturation", 
+                                        callback=self._camera_settings,
+                                        user_data=[self.camsettings, 4],
+                                        max_value=100, 
+                                        default_value = self.saturation)
+                        self.ctsharpness = dpg.add_slider_int(label="Sharpness", 
+                                        callback=self._camera_settings,
+                                        user_data=[self.camsettings, 5],
+                                        max_value=100, 
+                                        default_value = self.sharpness)
+                        self.ctgamma= dpg.add_slider_int(label="Gamma", 
+                                        callback=self._camera_settings,
+                                        user_data=[self.camsettings, 6],
+                                        max_value=100, 
+                                        default_value = self.gamma)
+                        self.ctbacklight = dpg.add_slider_int(label="Backlight", 
+                                        callback=self._camera_settings,
+                                        user_data=[self.saturation, 7],
+                                        max_value=100, 
+                                        default_value = self.backlight)
+                        self.ctwhite_balance = dpg.add_slider_int(label="White balance", 
+                                        callback=self._camera_settings,
+                                        user_data=[self.camsettings, 8],
+                                        max_value=100, 
+                                        default_value = self.white_balance)
+
+    def _camera_settings(self, sender, app_data, user_data):
+        print(user_data )
+        print(app_data )
+    def _vid_settings(self, sender, app_data, user_data):
+        if user_data[1] == 1:
+            self.zoom = app_data
+            print ("Zoom", self.zoom)
+        elif user_data[1] == 2:
+            self.focus = app_data
+            print ("focus", self.focus)
+        elif user_data[1] == 3:
+            self.exposure = app_data
+            print ("exposure", self.exposure)
+        elif user_data[1] == 4:
+            self.roll = app_data
+            print ("roll", self.roll)
+        elif user_data[1] == 5:
+            self.tilt = app_data
+            print ("tilt", self.tilt)
+        elif user_data[1] == 6:
+            self.set_fps(app_data)
+            print ("FPS", self.fps)
 
     def _coloredit(self, sender, app_data, user_data):
         for i in range (0, 4): app_data[i] = int(app_data[i]*255)
@@ -365,3 +485,19 @@ class CameraController:
 
         self.xoffset = int(self.frame_width/2)
         self.yoffset = int(self.frame_height/2)
+
+    def cam_control_defaults(self):
+        self.zoom = 0
+        self.focus = 0
+        self.exposure = 1000
+        self.roll = 0
+        self.tilt = 50
+
+        self.brightness = 0 
+        self.contrast = 6
+        self.hue = 0
+        self.saturation = 0
+        self.sharpness = 0
+        self.gamma = 0
+        self.white_balance = 0
+        self.backlight = 0
