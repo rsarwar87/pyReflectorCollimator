@@ -247,7 +247,7 @@ class CameraController:
                         self.ctfocus = dpg.add_slider_int(label="Focus", 
                                         callback=self._vid_settings,
                                         user_data=[self.vidsettings, 2],
-                                        max_value=100, 
+                                        max_value=1000, 
                                         default_value = self.focus)
                         self.ctexposure= dpg.add_slider_int(label="FPS", 
                                         callback=self._vid_settings,
@@ -320,7 +320,9 @@ class CameraController:
                 print ("Zoom", self.zoom)
             elif user_data[1] == 2:
                 self.focus = app_data
-                print ("focus", self.focus)
+                print ("focus", self.focus, self.vid.set(cv.CAP_PROP_AUTOFOCUS, 0))
+                print ("focus", self.focus, self.vid.set(cv.CAP_PROP_FOCUS, self.focus))
+                print ("focus", self.focus, self.vid.get(cv.CAP_PROP_FOCUS))
             elif user_data[1] == 3:
                 self.exposure = app_data
                 print ("exposure", self.exposure)
@@ -511,11 +513,12 @@ class CameraController:
 
     def cam_control_defaults(self):
         self.zoom = 0
-        self.focus = 0
+        self.focus = self.vid.get(cv.CAP_PROP_FOCUS)
         self.exposure = 1000
         self.roll = 0
         self.tilt = 50
-
+        print('Focus', self.vid.get(cv.CAP_PROP_FOCUS))
+        print('AudoFocus', self.vid.get(cv.CAP_PROP_AUTOFOCUS ))
         self.brightness = self.vid.get(cv.CAP_PROP_BRIGHTNESS) 
         self.contrast = self.vid.get(cv.CAP_PROP_CONTRAST)
         self.hue = self.vid.get(cv.CAP_PROP_HUE)
