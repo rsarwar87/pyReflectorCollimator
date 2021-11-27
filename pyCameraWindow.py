@@ -63,7 +63,7 @@ class CameraWindow():
         if cc.cbOffset == False: 
             origin = (int(cc.frame_width/2), int(cc.frame_height/2))
         else:
-            origin = (int(cc.xoffset), int(cc.yoffset))
+            origin = (int(cc.frame_width/2 + (cc.frame_width/2 - cc.xoffset)/10), int(cc.frame_height/2 + (cc.frame_height/2 - cc.yoffset)/2 ))
 
         if cc.roll > 0:
             M = cv.getRotationMatrix2D(origin, cc.roll, 1)
