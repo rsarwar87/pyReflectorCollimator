@@ -6,7 +6,6 @@ import time
 import os
 from matplotlib.pyplot import *
 from numpy import *
-import smbus
 import cv2 as cv
 import dearpygui.dearpygui as dpg
 
@@ -39,8 +38,8 @@ class CameraController:
         else:
             print("error, codec in ",self.decode_fourcc(self.vid.get(cv.CAP_PROP_FOURCC)))
 
-        w=1920
-        h=1080
+        w=1280
+        h=720
         fps=30
         res1=cap.set(cv.CAP_PROP_FRAME_WIDTH,w)
         res2=cap.set(cv.CAP_PROP_FRAME_HEIGHT,h)
