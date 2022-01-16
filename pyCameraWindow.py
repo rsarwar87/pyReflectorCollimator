@@ -53,12 +53,14 @@ class CameraWindow():
         ret, frame = self.cc.vid.read()
         cc = self.cc
         if (cc.zoom > 0):
-            xx = int(cc.frame_width*cc.zoom/300)
-            yy = int(cc.frame_height*cc.zoom/300)
-            crop = frame[yy:-yy, xx:-xx]
-            frame = cv.resize(crop, None, fx= cc.frame_width/crop.shape[1], 
-                              fy= cc.frame_height/crop.shape[1], 
-                              interpolation= cv.INTER_LINEAR)
+            height, width, channels = frame.shape
+            centerX,centerY=int(height/2),int(width/2)
+            scale = cc.zoom/100 
+            radiusX,radiusY= int(scale*height/2),int(scale*width/2)
+            minX,maxX=centerX-radiusX,centerX+radiusX
+            minY,maxY=centerY-radiusY,centerY+radiusY
+            cropped = frame[minX:maxX, minY:maxY]
+            frame = cv.resize(cropped, (width, height))
 
         if cc.cbOffset == False: 
             origin = (int(cc.frame_width/2), int(cc.frame_height/2))
