@@ -29,14 +29,21 @@ class CameraController:
 
         self.vid = cv.VideoCapture(video_idx)
         cap = self.vid
+        #This check may or may not work since sometimes a camera is "opened" just not the right one and it will not display
+        if not cap.isOpened():
+            print("Cannot open camera. Check cc = CameraController(3) in main.py and change 3 to maybe 0, 1, etc.")
+            
         oldfourcc = self.decode_fourcc(self.vid.get(cv.CAP_PROP_FOURCC))
         print("current codec {}".format(oldfourcc))
-        codec = cv.VideoWriter_fourcc(*'MJPG')
+        # On Windows, decoding not working. Display undecoded output just to see what it says. 
+        print("without decode {}".format(self.vid.get(cv.CAP_PROP_FOURCC)))
+        # MP4V also works if desired.  codec = cv.VideoWriter_fourcc(*"MP4V") 
+        codec = cv.VideoWriter_fourcc(*"MJPG")
         res=self.vid.set(cv.CAP_PROP_FOURCC,codec)
         if res:
-            print("codec in ",self.decode_fourcc(self.vid.get(cv.CAP_PROP_FOURCC)))
+            print("codec is ",self.decode_fourcc(self.vid.get(cv.CAP_PROP_FOURCC)))
         else:
-            print("error, codec in ",self.decode_fourcc(self.vid.get(cv.CAP_PROP_FOURCC)))
+            print("error, codec is ",self.decode_fourcc(self.vid.get(cv.CAP_PROP_FOURCC)))
 
         w=1280
         h=720
@@ -517,7 +524,7 @@ class CameraController:
         self.roll = 0
         self.tilt = 50
         print('Focus', self.vid.get(cv.CAP_PROP_FOCUS))
-        print('AudoFocus', self.vid.get(cv.CAP_PROP_AUTOFOCUS ))
+        print('AutoFocus', self.vid.get(cv.CAP_PROP_AUTOFOCUS ))
         self.brightness = self.vid.get(cv.CAP_PROP_BRIGHTNESS) 
         self.contrast = self.vid.get(cv.CAP_PROP_CONTRAST)
         self.hue = self.vid.get(cv.CAP_PROP_HUE)

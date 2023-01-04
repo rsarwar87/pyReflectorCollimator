@@ -6,7 +6,9 @@ from pyCameraController import CameraController
 from pyCameraWindow import CameraWindow
 
 if __name__ == "__main__":
-    cc = CameraController(3)
+    #If not seeing any camera output, change the 1 below to 0, 2, 3, etc.
+    #This could probably be automated or a user-select added.
+    cc = CameraController(1)
     dpg.create_context()
     dpg.create_viewport(title='PyReflectorCollimator', width=1800, height=800)
     dpg.setup_dearpygui()

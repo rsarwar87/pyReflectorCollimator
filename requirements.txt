@@ -1,0 +1,4 @@
+dearpygui==1.8.0
+matplotlib==3.6.2
+numpy==1.24.1
+opencv-python==4.7.0.68
